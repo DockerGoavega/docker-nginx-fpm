@@ -6,6 +6,7 @@ ENV NGINX_VERSION 1.12.1-1~xenial
 ENV FPM_VERSION 7.0.30-0ubuntu0.16.04.1
 ENV PHP_VERSION 1:7.0+35ubuntu6
 ENV DOCKER_BUILD_DIR /dockerbuild
+ENV STUNNEL_VERSION 3:5.44-1ubuntu3
 
 #directories
 ENV NGINX_CONF /etc/nginx/nginx.conf
@@ -16,6 +17,7 @@ ENV php_conf /etc/php/7.0/fpm/php.ini
 ENV fpm_conf /etc/php/7.0/fpm/php-fpm.conf
 ENV fpm_pool /etc/php/7.0/fpm/pool.d/www.conf
 ENV NGINX_LOG_DIR /home/LogFiles/nginx/
+ENV stunnel_conf /etc/default/stunnel4
 # ssh
 ENV SSH_PASSWD "root:Docker!"
 
@@ -77,6 +79,14 @@ RUN set -ex && \
 	sed -i -e "s/group = www-data/group = nginx/g" ${fpm_pool} && \
 	sed -i -e "s/;catch_workers_output\s*=\s*no/catch_workers_output = yes/g" ${fpm_pool} && \
 	sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" ${fpm_pool}
+#--------------|
+# stunnel4     |
+#--------------|
+RUN set -e \
+	&& apt-get update \
+	&& apt-get install --no-install-recommends --no-install-suggests -y stunnel4
+RUN set -ex && \
+	sed -i -e "s/ENALBED=0/ENABLED=1/g" ${stunnel_conf}
 #link log files to /home
 RUN rm -rf /var/log/nginx/ \
 	&& mkdir -p ${NGINX_LOG_DIR} \
